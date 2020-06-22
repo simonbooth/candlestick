@@ -1,6 +1,5 @@
 package io.nubhub.candlestick
 
-import android.app.Activity
 import android.content.DialogInterface
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -32,15 +31,17 @@ class NotificationDialogFragment : DialogFragment() {
     private var sender: String? = null
     private var subject: String? = null
     public var url: String? = null
+    private var rtUri: Uri? = null
     private var ringer: Ringtone? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (getArguments() != null) {
+        if (arguments != null) {
             val mArgs = arguments
             subject= mArgs?.getString("subject")
             sender= mArgs?.getString("sender")
             url= mArgs?.getString("url")
+            rtUri = Uri.parse(mArgs?.getString("rtUrl"))
         }
     }
 
@@ -53,7 +54,9 @@ class NotificationDialogFragment : DialogFragment() {
         title.text="Incoming call"
         textViewSubject.text = subject
         textViewDescription.text = sender + " is calling you. Press Green to accept the call, any other button to reject."
-        val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+//        val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        ringer = RingtoneManager.getRingtone(activity, rtUri)
+        ringer?.play()
 //        this.ringer = RingtoneManager.getRingtone(applicationContext, notification)
 ///    this.ringer?.stop()
     }
@@ -98,6 +101,7 @@ class NotificationDialogFragment : DialogFragment() {
     override fun onDestroyView() {
         dialog?.setOnKeyListener(null)
         super.onDestroyView()
+        ringer?.stop()
     }
 
     companion object {

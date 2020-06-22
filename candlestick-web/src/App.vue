@@ -42,7 +42,25 @@
         </v-row>
       </v-container>
     </v-main>
-    <pair-device></pair-device>
+    <v-card width="400" class="mx-auto mt-5">
+      <v-card-title>
+        <h1 class="display-1">Setup a new device</h1>
+      </v-card-title>
+      <v-card-text>
+        <v-form>
+          <v-text-field prepend-icon="mdi-tablet" label="Pairing Code" v-model="pairingCode" />
+          <v-text-field prepend-icon="mdi-account-group" label="Admin Group" v-model="adminGroup" />
+          <v-text-field
+            prepend-icon="mdi-account-circle"
+            label="Subscriber Id"
+            v-model="subscriberId"
+          />
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="info" v-on:click="pair()">Pair</v-btn>
+      </v-card-actions>
+    </v-card>
   </v-app>
 </template>
 <script>
@@ -52,22 +70,7 @@ export default {
   },
   data: () => ({
     drawer: null,
-    items: [
-      { icon: "lightbulb_outline", text: "Notes" },
-      { icon: "touch_app", text: "Reminders" },
-      { divider: true },
-      { heading: "Labels" },
-      { icon: "add", text: "Create new label" },
-      { divider: true },
-      { icon: "archive", text: "Archive" },
-      { icon: "delete", text: "Trash" },
-      { divider: true },
-      { icon: "settings", text: "Settings" },
-      { icon: "chat_bubble", text: "Trash" },
-      { icon: "help", text: "Help" },
-      { icon: "phonelink", text: "App downloads" },
-      { icon: "keyboard", text: "Keyboard shortcuts" }
-    ]
+    items: [{ icon: "add", text: "Add new device" }]
   })
 };
 </script>

@@ -81,7 +81,7 @@ class NubHubService : Service() {
     Fuel.post("https://candlestick.nubhub.io/api")
         .jsonBody(Gson().toJson(currentState).toString())
         .responseObject<Device> { _, _, result ->
-            Log.d(MainActivity.TAG,"response from nubhub:"+ (result as Result.Success).value.PairingCode+"," + (result as Result.Success).value.DeviceId)
+            Log.d(MainActivity.TAG,"response from nubhub:"+  (result as Result.Success).value.toString())
             val intent = Intent("CandlestickInit")
             intent.putExtra("firebaseToken", currentState.FirebaseToken)
             intent.putExtra(

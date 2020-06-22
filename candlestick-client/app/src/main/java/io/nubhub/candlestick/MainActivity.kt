@@ -30,6 +30,7 @@ public class MainActivity() : AppCompatActivity(),
     var zoomAppKey: String = ""
     var zoomAppSecret: String = ""
     var bgUrl: String = ""
+    var rtUrl: String = ""
 
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -122,7 +123,7 @@ public class MainActivity() : AppCompatActivity(),
 //                    if(intent.extras!!.getString("subscriberId")!=""){
 //                        tvSubscriberId.text = intent.extras!!.getString("subscriberId")
 //                    }
-//                    textView2.text = "Ready" //todo populate with subscriber info
+                    tvStatus.text = "Waiting"
                 }
             } else if (intent.action == "io.nubhub.candlestick.CANDLESTICK_BUTTONS") {
                 val foo: CharSequence =
@@ -156,6 +157,9 @@ public class MainActivity() : AppCompatActivity(),
 //                            println(profileObj["FirstName"].asString)
                                 if (groupUIObj["AppBackground"].asString.length > 0) {
                                     bgUrl = groupUIObj["AppBackground"].asString
+                                }
+                                if (groupUIObj["Ringtone"].asString.length > 0) {
+                                    rtUrl = groupUIObj["Ringtone"].asString
                                 }
                             }
                         }
@@ -226,6 +230,7 @@ public class MainActivity() : AppCompatActivity(),
         if (bgUrl.length > 0) {
             imageViewBackground.load(bgUrl)
         }
+
         initializeZoom()
     }
 
@@ -236,6 +241,7 @@ public class MainActivity() : AppCompatActivity(),
         args.putString("sender", sender)
         args.putString("subject", subject)
         args.putString("url", url)
+        args.putString("rtUrl",rtUrl)
         callNotification.setArguments(args)
         callNotification.show(supportFragmentManager, "call")
     }
@@ -246,6 +252,7 @@ public class MainActivity() : AppCompatActivity(),
         args.putString("sender", sender)
         args.putString("body", body)
         args.putString("subject", subject)
+        args.putString("rtUrl",rtUrl)
         textNotification.setArguments(args)
         textNotification.show(supportFragmentManager, "call")
     }
@@ -382,7 +389,8 @@ public class MainActivity() : AppCompatActivity(),
     }
 
     public override fun onMeetingStatusChanged(
-        meetingStatus: MeetingStatus?, errorCode: Int,
+        meetingStatus: MeetingStatus?,
+        errorCode: Int,
         internalErrorCode: Int
     ) {
         Log.i(
@@ -390,19 +398,23 @@ public class MainActivity() : AppCompatActivity(),
             "onMeetingStatusChanged, meetingStatus=" + meetingStatus + ", errorCode=" + errorCode
                     + ", internalErrorCode=" + internalErrorCode
         );
-        when (meetingStatus) {
-            MeetingStatus.MEETING_STATUS_INMEETING -> tvStatus.text = "in call"
-            MeetingStatus.MEETING_STATUS_IDLE -> tvStatus.text = "ready"
-            MeetingStatus.MEETING_STATUS_FAILED -> tvStatus.text = "error : " + errorCode
-            MeetingStatus.MEETING_STATUS_CONNECTING -> tvStatus.text = "connecting"
-            MeetingStatus.MEETING_STATUS_WAITINGFORHOST -> tvStatus.text = "waiting"
-            MeetingStatus.MEETING_STATUS_DISCONNECTING -> tvStatus.text = "connecting"
-            MeetingStatus.MEETING_STATUS_RECONNECTING -> tvStatus.text = "connecting"
-            MeetingStatus.MEETING_STATUS_IN_WAITING_ROOM -> tvStatus.text = "waiting"
-            MeetingStatus.MEETING_STATUS_WEBINAR_PROMOTE -> tvStatus.text = "waiting"
-            MeetingStatus.MEETING_STATUS_WEBINAR_DEPROMOTE -> tvStatus.text = "waiting"
-            MeetingStatus.MEETING_STATUS_UNKNOWN -> tvStatus.text = "unknown"
-            null -> tvStatus.text = "unknown"
+        if (errorCode != ZoomError.ZOOM_ERROR_SUCCESS) {
+            tvStatus.text = "error : Z" + errorCode //todo populate with subscriber info
+        } else {
+            when (meetingStatus) {
+                MeetingStatus.MEETING_STATUS_INMEETING -> tvStatus.text = "in call"
+                MeetingStatus.MEETING_STATUS_IDLE -> tvStatus.text = "ready"
+                MeetingStatus.MEETING_STATUS_FAILED -> tvStatus.text = "error : " + errorCode
+                MeetingStatus.MEETING_STATUS_CONNECTING -> tvStatus.text = "connecting"
+                MeetingStatus.MEETING_STATUS_WAITINGFORHOST -> tvStatus.text = "waiting"
+                MeetingStatus.MEETING_STATUS_DISCONNECTING -> tvStatus.text = "connecting"
+                MeetingStatus.MEETING_STATUS_RECONNECTING -> tvStatus.text = "connecting"
+                MeetingStatus.MEETING_STATUS_IN_WAITING_ROOM -> tvStatus.text = "waiting"
+                MeetingStatus.MEETING_STATUS_WEBINAR_PROMOTE -> tvStatus.text = "waiting"
+                MeetingStatus.MEETING_STATUS_WEBINAR_DEPROMOTE -> tvStatus.text = "waiting"
+                MeetingStatus.MEETING_STATUS_UNKNOWN -> tvStatus.text = "unknown"
+                null -> tvStatus.text = "unknown"
+            }
         }
     }
 
