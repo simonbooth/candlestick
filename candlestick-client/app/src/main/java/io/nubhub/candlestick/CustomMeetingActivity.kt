@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import com.zipow.videobox.confapp.ConfMgr
+import us.zoom.sdk.InMeetingEventHandler
 import us.zoom.sdk.MeetingActivity
 
 class CustomMeetingActivity : MeetingActivity () {

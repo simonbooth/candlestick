@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
 import android.util.Log
@@ -291,8 +292,11 @@ public class MainActivity() : AppCompatActivity(),
             df.dismiss()
         }
         // Step 1: Get meeting number from input field.
-        val matchResult = Regex("j/(\\d+)(?:\\?pwd=([^&]*))?").find(url)
-        val (meetingNo, password) = matchResult!!.destructured
+        val uri: Uri = Uri.parse(url)
+       val meetingNo:String = uri.lastPathSegment.toString()
+        val password:String = uri.getQueryParameter("pwd").toString()
+//        val matchResult = Regex("j/(\\d+)(?:\\?pwd=([^&]*))?").find(url)
+//        val (meetingNo, password) = matchResult!!.destructured
         Log.d(TAG, "Launching Meeting:" + meetingNo + " " + password)
 
 //        val meetingNo: String = parts.group//"75907493208"//"73624397564" //https://us04web.zoom.us/j/73624397564?pwd=Qnd1Z0RSQzV3U1hyWEc0QWxTMVRHUT09
