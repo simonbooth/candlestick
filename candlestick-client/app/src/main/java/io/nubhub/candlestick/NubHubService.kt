@@ -70,44 +70,52 @@ class NubHubService : Service() {
 
     }
 
-    public fun getSubscriberInfo(token:String?){
-    prefs = this.getSharedPreferences(PREFS_FILENAME, 0)
-    var currentState = Device()
-    currentState.FirebaseToken = token.toString()
-    currentState.DeviceId = prefs?.getString("deviceId", "").toString()
+    public fun getSubscriberInfo(token:String?) {
+        prefs = this.getSharedPreferences(PREFS_FILENAME, 0)
+        var currentState = Device()
+        currentState.FirebaseToken = token.toString()
+        currentState.DeviceId = prefs?.getString("deviceId", "").toString()
 
-    Log.d(MainActivity.TAG,"calling nubhub:"+ currentState.FirebaseToken+"," + currentState.DeviceId)
+        Log.d(
+            MainActivity.TAG,
+            "calling nubhub:" + currentState.FirebaseToken + "," + currentState.DeviceId
+        )
 
-    Fuel.post("https://candlestick.nubhub.io/api")
-        .jsonBody(Gson().toJson(currentState).toString())
-        .responseObject<Device> { _, _, result ->
-            Log.d(MainActivity.TAG,"response from nubhub:"+  (result as Result.Success).value.toString())
-            val intent = Intent("CandlestickInit")
-            intent.putExtra("firebaseToken", currentState.FirebaseToken)
-            intent.putExtra(
-                "pairingCode",
-                (result as Result.Success).value.PairingCode.toString()
-            )
-            broadcaster!!.sendBroadcast(intent)
-            prefs?.edit()?.putString("deviceId",(result as Result.Success).value.DeviceId.toString())?.apply()
-        }
+        Fuel.post("https://candlestick.nubhub.io/api")
+            .jsonBody(Gson().toJson(currentState).toString())
+            .responseObject<Device> { _, _, result ->
+                Log.d(
+                    MainActivity.TAG,
+                    "response from nubhub:" + (result as Result.Success).value.toString()
+                )
+                val intent = Intent("CandlestickInit")
+                intent.putExtra("firebaseToken", currentState.FirebaseToken)
+                intent.putExtra(
+                    "pairingCode",
+                    (result as Result.Success).value.PairingCode.toString()
+                )
+                broadcaster!!.sendBroadcast(intent)
+                prefs?.edit()
+                    ?.putString("deviceId", (result as Result.Success).value.DeviceId.toString())
+                    ?.apply()
+            }
 
 
-    // send the token to the server, the server should return a short pairing code (which can rotate) if not paired
-    // display the short code on the screen.
-    // OR
-    // server returns meta info : Display Name, Background Pic, Shareable ID Number
-    // display background pic, overlay your Display Name and shareable ID number
-    // db : device-token | Device Name
-    // db : shareable ID | [device-tokens] | Person Name
-    // db : pairing code | token | expiration (change token every 5 mins, expire after 10 mins)
-    // web : setup screen : New user (Enter pairing Code), Existing user (Enter pairing Code + shareable ID)
-    // web : invite user : shareable ID + URL
-    // email : new mail (gmail), parse URL
+        // send the token to the server, the server should return a short pairing code (which can rotate) if not paired
+        // display the short code on the screen.
+        // OR
+        // server returns meta info : Display Name, Background Pic, Shareable ID Number
+        // display background pic, overlay your Display Name and shareable ID number
+        // db : device-token | Device Name
+        // db : shareable ID | [device-tokens] | Person Name
+        // db : pairing code | token | expiration (change token every 5 mins, expire after 10 mins)
+        // web : setup screen : New user (Enter pairing Code), Existing user (Enter pairing Code + shareable ID)
+        // web : invite user : shareable ID + URL
+        // email : new mail (gmail), parse URL
 
-    // meet, skype, zoom
+        // meet, skype, zoom
 
-}
+    }
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 //        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show()
         // Instantiate the RequestQueue.

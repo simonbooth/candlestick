@@ -32,6 +32,7 @@ public class MainActivity() : AppCompatActivity(),
     var zoomAppSecret: String = ""
     var bgUrl: String = ""
     var rtUrl: String = ""
+    var ready: Boolean = false
 
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -124,7 +125,7 @@ public class MainActivity() : AppCompatActivity(),
 //                    if(intent.extras!!.getString("subscriberId")!=""){
 //                        tvSubscriberId.text = intent.extras!!.getString("subscriberId")
 //                    }
-                    tvStatus.text = "Waiting"
+                    tvStatus.text = "initializing"
                 }
             } else if (intent.action == "io.nubhub.candlestick.CANDLESTICK_BUTTONS") {
                 val foo: CharSequence =
@@ -135,6 +136,7 @@ public class MainActivity() : AppCompatActivity(),
                     val meetingService = zoomSDK.meetingService
                     meetingService.leaveCurrentMeeting(false)
                     tvStatus.text = "ready"
+                    ready = true
                 }
             } else if (intent.action == "CandlestickInboundMessage") {
                 val command = intent.extras!!.getString("command")
@@ -210,18 +212,21 @@ public class MainActivity() : AppCompatActivity(),
 //                    }
 //                    textView2.text = "Ready" //todo populate with subscriber info
                 } else if (command == "text") {
-
-                    showTextMessage(
-                        intent.extras!!.getString("sender"),
-                        intent.extras!!.getString("body"),
-                        intent.extras!!.getString("subject")
-                    )
+                    if (ready) { // todo : enhance with server side call handling / processing
+                        showTextMessage(
+                            intent.extras!!.getString("sender"),
+                            intent.extras!!.getString("body"),
+                            intent.extras!!.getString("subject")
+                        )
+                    }
                 } else {
-                    showInboundCall(
-                        intent.extras!!.getString("sender"),
-                        intent.extras!!.getString("url"),
-                        intent.extras!!.getString("subject")
-                    )
+                    if (ready) { // todo : enhance with server side call handling / processing
+                        showInboundCall(
+                            intent.extras!!.getString("sender"),
+                            intent.extras!!.getString("url"),
+                            intent.extras!!.getString("subject")
+                        )
+                    }
                 }
             }
         }
@@ -242,7 +247,7 @@ public class MainActivity() : AppCompatActivity(),
         args.putString("sender", sender)
         args.putString("subject", subject)
         args.putString("url", url)
-        args.putString("rtUrl",rtUrl)
+        args.putString("rtUrl", rtUrl)
         callNotification.setArguments(args)
         callNotification.show(supportFragmentManager, "call")
     }
@@ -253,7 +258,7 @@ public class MainActivity() : AppCompatActivity(),
         args.putString("sender", sender)
         args.putString("body", body)
         args.putString("subject", subject)
-        args.putString("rtUrl",rtUrl)
+        args.putString("rtUrl", rtUrl)
         textNotification.setArguments(args)
         textNotification.show(supportFragmentManager, "call")
     }
@@ -293,8 +298,8 @@ public class MainActivity() : AppCompatActivity(),
         }
         // Step 1: Get meeting number from input field.
         val uri: Uri = Uri.parse(url)
-       val meetingNo:String = uri.lastPathSegment.toString()
-        val password:String = uri.getQueryParameter("pwd").toString()
+        val meetingNo: String = uri.lastPathSegment.toString()
+        val password: String = uri.getQueryParameter("pwd").toString()
 //        val matchResult = Regex("j/(\\d+)(?:\\?pwd=([^&]*))?").find(url)
 //        val (meetingNo, password) = matchResult!!.destructured
         Log.d(TAG, "Launching Meeting:" + meetingNo + " " + password)
@@ -321,6 +326,7 @@ public class MainActivity() : AppCompatActivity(),
         // Check if the zoom SDK is initialized
         if (!zoomSDK.isInitialized) {
             tvStatus.text = "error : Not initialized"
+            ready=false
 //            Toast.makeText(this, "ZoomSDK has not been initialized successfully", Toast.LENGTH_LONG)
 //                .show()
             return
@@ -370,9 +376,11 @@ public class MainActivity() : AppCompatActivity(),
         internalErrorCode: Int
     ) { //int errorCode, int internalErrorCode
         if (errorCode != ZoomError.ZOOM_ERROR_SUCCESS) {
-            tvStatus.text = "error : Z" + errorCode //todo populate with subscriber info
+            tvStatus.text = "error : I-" + errorCode //todo populate with subscriber info
+            ready = false
         } else {
             tvStatus.text = "ready"
+            ready = true
         }
     }
 
@@ -403,12 +411,20 @@ public class MainActivity() : AppCompatActivity(),
                     + ", internalErrorCode=" + internalErrorCode
         );
         if (errorCode != ZoomError.ZOOM_ERROR_SUCCESS) {
-            tvStatus.text = "error : Z" + errorCode //todo populate with subscriber info
+            tvStatus.text = "error : Z-" + errorCode //todo populate with subscriber info
+            ready=true
         } else {
+            ready = false
             when (meetingStatus) {
                 MeetingStatus.MEETING_STATUS_INMEETING -> tvStatus.text = "in call"
-                MeetingStatus.MEETING_STATUS_IDLE -> tvStatus.text = "ready"
-                MeetingStatus.MEETING_STATUS_FAILED -> tvStatus.text = "error : " + errorCode
+                MeetingStatus.MEETING_STATUS_IDLE -> {
+                    tvStatus.text = "ready"
+                    ready = true
+                }
+                MeetingStatus.MEETING_STATUS_FAILED -> {
+                    tvStatus.text = "error : M-" + errorCode
+                    ready = true
+                }
                 MeetingStatus.MEETING_STATUS_CONNECTING -> tvStatus.text = "connecting"
                 MeetingStatus.MEETING_STATUS_WAITINGFORHOST -> tvStatus.text = "waiting"
                 MeetingStatus.MEETING_STATUS_DISCONNECTING -> tvStatus.text = "connecting"
@@ -416,8 +432,14 @@ public class MainActivity() : AppCompatActivity(),
                 MeetingStatus.MEETING_STATUS_IN_WAITING_ROOM -> tvStatus.text = "waiting"
                 MeetingStatus.MEETING_STATUS_WEBINAR_PROMOTE -> tvStatus.text = "waiting"
                 MeetingStatus.MEETING_STATUS_WEBINAR_DEPROMOTE -> tvStatus.text = "waiting"
-                MeetingStatus.MEETING_STATUS_UNKNOWN -> tvStatus.text = "unknown"
-                null -> tvStatus.text = "unknown"
+                MeetingStatus.MEETING_STATUS_UNKNOWN -> {
+                    tvStatus.text = "unknown"
+                    ready = true
+                }
+                null -> {
+                    tvStatus.text = "unknown"
+                    ready=true
+                }
             }
         }
     }

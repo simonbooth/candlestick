@@ -12,9 +12,7 @@ class MyNotificationService :  FirebaseMessagingService() {
 
     override fun onCreate() {
         broadcaster = LocalBroadcastManager.getInstance(this)
-
     }
-
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         // ...
 
