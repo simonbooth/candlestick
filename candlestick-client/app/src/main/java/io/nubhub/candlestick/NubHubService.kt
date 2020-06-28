@@ -23,6 +23,7 @@ data class Device(
     var DeviceId: String = "",
     var FirebaseToken: String = "",
     var PairingCode: String = "",
+    var PairingUrl: String = "",
     var SubscriberId: String = ""
 )
 
@@ -93,6 +94,10 @@ class NubHubService : Service() {
                 intent.putExtra(
                     "pairingCode",
                     (result as Result.Success).value.PairingCode.toString()
+                )
+                intent.putExtra(
+                    "pairingUrl",
+                    (result as Result.Success).value.PairingUrl.toString()
                 )
                 broadcaster!!.sendBroadcast(intent)
                 prefs?.edit()

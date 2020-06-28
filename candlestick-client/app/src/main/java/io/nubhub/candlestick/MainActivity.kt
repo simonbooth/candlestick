@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.PowerManager
@@ -20,7 +21,9 @@ import coil.api.load
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import kotlinx.android.synthetic.main.activity_main.*
+import net.glxn.qrgen.android.QRCode
 import us.zoom.sdk.*
+
 
 public class MainActivity() : AppCompatActivity(),
     ZoomSDKInitializeListener,
@@ -119,12 +122,26 @@ public class MainActivity() : AppCompatActivity(),
                     tvStatus.text = "activating"
                     tvPairingCode.text = intent.extras!!.getString("pairingCode")
                     tvPairingCode.visibility = View.VISIBLE
+                    if(intent.extras!!.getString("pairingUrl")!="") {
+                        val myBitmap: Bitmap = QRCode.from(intent.extras!!.getString("pairingUrl")).bitmap()
+                        ivQRCode.setImageBitmap(myBitmap)
+                        ivQRCode.visibility = View.VISIBLE
+                    }
+                    tvSkype.visibility = View.INVISIBLE
+                    tvWhatsApp.visibility = View.INVISIBLE
+                    tvZoomEmail.visibility = View.INVISIBLE
+
                 } else {
 //                    initializeZoom()
 //                    initializeAppState()
 //                    if(intent.extras!!.getString("subscriberId")!=""){
 //                        tvSubscriberId.text = intent.extras!!.getString("subscriberId")
 //                    }
+                    tvPairingCode.text = ""
+                    ivQRCode.visibility=View.INVISIBLE
+                    tvPairingCode.visibility = View.INVISIBLE
+
+
                     tvStatus.text = "initializing"
                 }
             } else if (intent.action == "io.nubhub.candlestick.CANDLESTICK_BUTTONS") {
@@ -142,6 +159,7 @@ public class MainActivity() : AppCompatActivity(),
                 val command = intent.extras!!.getString("command")
                 if (command == "activated") {
                     tvPairingCode.text = ""
+                    ivQRCode.visibility=View.INVISIBLE
                     tvPairingCode.visibility = View.INVISIBLE
                     if (intent.extras!!.getString("zoomAppKey") != "") {
                         zoomAppKey = intent.extras!!.getString("zoomAppKey").toString()
@@ -177,6 +195,9 @@ public class MainActivity() : AppCompatActivity(),
                                 val userObj = element.asJsonObject
 //                            println(profileObj["FirstName"].asString)
                                 if (userObj["Profile"].isJsonObject) {
+                                    tvSkype.visibility = View.VISIBLE
+                                    tvWhatsApp.visibility = View.VISIBLE
+                                    tvZoomEmail.visibility = View.VISIBLE
                                     tvSkype.text =
                                         userObj["Profile"].asJsonObject["Skype"].asString
                                     tvWhatsApp.text =
